@@ -7,7 +7,7 @@ void ofApp::setup(){
 	ofSetBackgroundAuto(FALSE);
 	ofBackground(30,30,30);
 
-	franklin.loadFont("frabk.ttf", 12);
+	franklin.load("frabk.ttf", 12);
 
 	gui.setup("Face Detection", "settings.xml", width + 10, 10);
 	gui.setSize(250, 20);
@@ -41,12 +41,12 @@ void ofApp::setup(){
 #else
 	gui.add(helpText.setup("Press", "\n m:  track mouth  \n e:  track eyes \n n:  track nose \n f:  track face \n", 250, 200));
 
-    vidPlayer.loadMovie("testVideo.mp4");
+    vidPlayer.load("testVideo.mp4");
     vidPlayer.setLoopState(OF_LOOP_NORMAL);
     vidPlayer.play();
 
-    width	= vidPlayer.width;
-    height 	= vidPlayer.height;
+    width	= vidPlayer.getWidth();
+    height 	= vidPlayer.getHeight();
 #endif
 
 
@@ -76,9 +76,9 @@ void ofApp::update(){
 	if (bNewFrame){
 		if(haarSetup)
 			#ifdef _USE_LIVE_VIDEO
-            	haarFinder.findHaarObjects((ofPixels&)(vidGrabber.getPixelsRef()));	
+            	haarFinder.findHaarObjects((ofPixels&)(vidGrabber.getPixels()));	
 			#else
-            	haarFinder.findHaarObjects((ofPixels&)(vidPlayer.getPixelsRef()));	
+            	haarFinder.findHaarObjects((ofPixels&)(vidPlayer.getPixels()));	
 			#endif
 	}	
 
@@ -101,7 +101,7 @@ void ofApp::draw(){
 		ofSetHexColor(0xffffff);
 		vidPlayer.draw(0,0);
 		for(int i = 0; i < (int)haarFinder.blobs.size(); i++) {
-			ofRect(haarFinder.blobs[i].boundingRect);
+			ofDrawRectangle(haarFinder.blobs[i].boundingRect);
 	     	ofNoFill();
 	  	}
 	#endif
@@ -139,7 +139,7 @@ void ofApp::keyPressed  (int key){
 			break;
 
 		case 'c':
-			capture.setFromPixels(vidGrabber.getPixelsRef());
+			capture.setFromPixels(vidGrabber.getPixels());
 			capture.saveImage("capture.png");
 			break;
 #endif

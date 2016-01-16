@@ -128,6 +128,10 @@ void ofApp::keyPressed(int key){
 			threshold --;
 			if (threshold < 0) threshold = 0;
 			break;
+	    case '0':
+            //take movie to the start
+            vidPlayer.firstFrame();
+            break;
 	}
 }
 

@@ -30,12 +30,12 @@ void ofApp::draw(){
         movie.draw(X_OFFSET, 0);
 
         //display progress bar only if the mouse is in the bottom
-        if(mouseY > movie.height - 40){
+        if(mouseY > movie.getHeight() - 40){
             ofEnableAlphaBlending();    // turn on alpha blending
             ofSetColor(255, 64, 64, 127);    // pinkish red, 50% transparent
 
             //display a rectangle for the progress bar
-            ofRect(X_OFFSET, (movie.height - movie.height/20), (movie.getPosition() * movie.width), movie.height/20);
+            ofDrawRectangle(X_OFFSET, (movie.getHeight() - movie.getHeight()/20), (movie.getPosition() * movie.getWidth()), movie.getHeight()/20);
             ofDisableAlphaBlending(); 
         }
     }
@@ -56,7 +56,7 @@ void ofApp::keyPressed  (int key){
             string loadPath = "movies/fingers.mov";
 
             //load movie from the input path
-            movie.loadMovie(loadPath);
+            movie.load(loadPath);
 
             //start playing
             movie.play();
@@ -121,10 +121,10 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 
-    if(y > (movie.height - movie.height/10))
+    if(y > (movie.getHeight() - movie.getHeight()/10))
     {
         //fast forward propotional to the mouse position
-        movie.setFrame(((float)mouseX/(float)movie.width) * movie.getTotalNumFrames());
+        movie.setFrame(((float)mouseX/(float)movie.getWidth()) * movie.getTotalNumFrames());
 
     }
 }

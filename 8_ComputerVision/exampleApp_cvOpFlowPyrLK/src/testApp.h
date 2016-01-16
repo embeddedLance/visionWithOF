@@ -29,7 +29,7 @@ class testApp : public ofSimpleApp{
 		ofVideoGrabber 		vidGrabber;
 #else
 		ofVideoPlayer 		vidPlayer;
-#endif;
+#endif
 
 		ofxCvGrayscaleImage 	grayImage;
 		ofxCvGrayscaleImage 	grayBg;

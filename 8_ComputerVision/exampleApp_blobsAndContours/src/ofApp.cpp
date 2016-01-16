@@ -25,13 +25,13 @@ void ofApp::setup(){
 	
 	image.loadImage("lowerKachura.jpg");
 	width  = ofGetWidth() - 320;
-	height = (float)(width)/(float)(image.width) * image.height;
+	height = (float)(width)/(float)(image.getWidth()) * image.getHeight();
 	image.resize(width, height);
 	imageLoaded = true;
 
 	cout<< width << " " << height;
 
-	cvColorImage.setFromPixels(image.getPixelsRef());
+	cvColorImage.setFromPixels(image.getPixels());
 
 
 	red.allocate(width, height);
@@ -63,7 +63,7 @@ void ofApp::draw(){
 
 			case 's':
 				ofBackground(30,30,30);
-				cvColorImage.setFromPixels(image.getPixelsRef());
+				cvColorImage.setFromPixels(image.getPixels());
 				cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 				blue += green;
 				red -= blue;
@@ -134,7 +134,7 @@ void ofApp::detectHolesToggled(bool &detectHoles){
 void ofApp::detectContours(){
 	ofBackground(30,30,30);
 	
-	cvColorImage.setFromPixels(image.getPixelsRef());
+	cvColorImage.setFromPixels(image.getPixels());
 	cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 
 	blue += green;

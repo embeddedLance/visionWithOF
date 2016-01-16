@@ -5,7 +5,7 @@ void ofApp::setup(){
     
     ofBackground(30,30,30);
 
-	franklin.loadFont("frabk.ttf", 12);
+	franklin.load("frabk.ttf", 12);
 	
 	gui.setup("Image Processing", "settings.xml", 5, 5);
 	gui.add(blur.setup("Blur", IMG_X_OFFSET, 1, 25));
@@ -17,9 +17,9 @@ void ofApp::setup(){
 
 	imageLoaded = false;
 	
-	image.loadImage("lowerKachura.jpg");
+	image.load("lowerKachura.jpg");
 	width  = ofGetWidth() - 320;
-	height = (float)(width)/(float)(image.width) * image.height;
+	height = (float)(width)/(float)(image.getWidth()) * image.getHeight();
 	image.resize(width, height);
 	imageLoaded = true;
 
@@ -29,7 +29,7 @@ void ofApp::setup(){
     ofClear(30,30,30,255);
     canvas.end();
 
-	cvColorImage.setFromPixels(image.getPixelsRef());
+	cvColorImage.setFromPixels(image.getPixels());
 
 	red.allocate(width, height);
 	green.allocate(width, height);
@@ -61,7 +61,7 @@ void ofApp::draw(){
 			height = image.height/4;
 
 			cout << "init cvColorImage : ";
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cout << "width " << cvColorImage.getWidth() << ", height " << cvColorImage.getHeight();
 			}*/
 			break;
@@ -69,7 +69,7 @@ void ofApp::draw(){
 		case 'd':
             ofClear(30,30,30,255);
 			image.draw(IMG_X_OFFSET, 0);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			franklin.drawString("Basic Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
 			break;
 
@@ -77,14 +77,14 @@ void ofApp::draw(){
 			image.grabScreen(IMG_X_OFFSET,0,width,height);
 			ofFileDialogResult selectedPath = ofSystemLoadDialog("Please Select Folder to save Image", true, "/home/dimitri/" );
 			string savePath = selectedPath.filePath + "/image.png";
-			image.saveImage(savePath);
+			image.save(savePath);
 			}
 			franklin.drawString("Save Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
 			break;
 
 		case 'w':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			grayImage.setFromColorImage(cvColorImage);
 			grayImage.draw(IMG_X_OFFSET, 0);
 			franklin.drawString("Grayscale Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
@@ -92,7 +92,7 @@ void ofApp::draw(){
 
 		case 'n':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.invert();
 			cvColorImage.draw(IMG_X_OFFSET, 0);
 			franklin.drawString("Negative Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
@@ -100,7 +100,7 @@ void ofApp::draw(){
 
 		case 'm':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.mirror(FALSE, TRUE);
 			cvColorImage.draw(IMG_X_OFFSET, 0);
 			franklin.drawString("Mirror Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
@@ -108,7 +108,7 @@ void ofApp::draw(){
 
 		case 'c':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			grayImage.setFromColorImage(cvColorImage);
 			grayImage.contrastStretch();
 			grayImage.draw(IMG_X_OFFSET, 0);
@@ -117,7 +117,7 @@ void ofApp::draw(){
 
 		case 'e':{
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cannyImage.setFromColorImage(cvColorImage);
 			grayImage.setFromColorImage(cvColorImage);
 
@@ -133,7 +133,7 @@ void ofApp::draw(){
 		/*case 'x':
 			canvas.begin();
             ofClear(30,30,30,255);            
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			sobelImage.setFromColorImage(cvColorImage);
 			grayImage.setFromColorImage(cvColorImage);
 
@@ -145,7 +145,7 @@ void ofApp::draw(){
 		case 'y':
 			canvas.begin();
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			sobelImage.setFromColorImage(cvColorImage);
    			grayImage.setFromColorImage(cvColorImage);
 
@@ -157,7 +157,7 @@ void ofApp::draw(){
 
 		case 'r':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 			red.draw(IMG_X_OFFSET, 0);
 			franklin.drawString("Red Channel", IMG_X_OFFSET, height +CAPTION_OFFSET);
@@ -165,7 +165,7 @@ void ofApp::draw(){
 
 		case 'g':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 			green.draw(IMG_X_OFFSET, 0);
 			franklin.drawString("Green Channel", IMG_X_OFFSET, height +CAPTION_OFFSET);
@@ -173,7 +173,7 @@ void ofApp::draw(){
 
 		case 'b':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 			blue.draw(IMG_X_OFFSET, 0);
 			franklin.drawString("Blue Channel", IMG_X_OFFSET, height +CAPTION_OFFSET);
@@ -181,7 +181,7 @@ void ofApp::draw(){
 
 		case 'h':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.convertRgbToHsv();
 			cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 			red.draw(IMG_X_OFFSET, 0);
@@ -190,7 +190,7 @@ void ofApp::draw(){
 
 		case 's':
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.convertRgbToHsv();
 			cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 			green.draw(IMG_X_OFFSET, 0);
@@ -200,7 +200,7 @@ void ofApp::draw(){
 		case 'v':
 			
             ofClear(30,30,30,255);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			cvColorImage.convertRgbToHsv();
 			cvColorImage.convertToGrayscalePlanarImages(red, green, blue);
 			blue.draw(IMG_X_OFFSET, 0);
@@ -220,7 +220,7 @@ void ofApp::draw(){
 void ofApp::blurChanged(int & blur){
     
 	if(imageLoaded){
-		cvColorImage.setFromPixels(image.getPixelsRef());
+		cvColorImage.setFromPixels(image.getPixels());
 		cvColorImage.blur(blur);
 	}
 	displayBlurImage = true;
@@ -230,7 +230,7 @@ void ofApp::blurChanged(int & blur){
 void ofApp::gaussianBlurChanged(int & gaussianBlur){
 
 	if(imageLoaded){
-		cvColorImage.setFromPixels(image.getPixelsRef());
+		cvColorImage.setFromPixels(image.getPixels());
 		cvColorImage.blurGaussian(gaussianBlur);
 	}
 	displayBlurImage = true;

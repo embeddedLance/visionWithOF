@@ -7,6 +7,9 @@
 
 #define CAPTION_OFFSET	20
 #define IMG_X_OFFSET	260
+#define IMG_Y_OFFSET	0
+
+//#define _USE_LIVE_VIDEO	1
 
 
 class ofApp : public ofBaseApp{
@@ -14,7 +17,6 @@ class ofApp : public ofBaseApp{
 	public:
 		int width;
 		int height;
-		int startX, startY, endX, endY;
 		void setup();
 		void update();
 		void draw();
@@ -31,23 +33,34 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		void matchTemplate(int method);
-		void processKey(int key);
+		void loadImagePressed();
+		void blurChanged(int & blur);
+		void gaussianBlurChanged(int & gaussianBlur);
+		
+        #ifdef _USE_LIVE_VIDEO
+		  ofVideoGrabber 		vidGrabber;
+		#else
+		  ofVideoPlayer 		vidPlayer;
+		#endif
 
 		ofImage image;
-		ofxCvColorImage subjImage;
-		ofxCvColorImage cvColorImage;
-		ofxCvFloatImage resultImage;
+		ofxCvColorImage 		cvColorImage;
+		ofxCvColorImage			hsvImage;
+		ofxCvGrayscaleImage 	hueImage;
+		ofxCvGrayscaleImage 	satImage;
+		ofxCvGrayscaleImage 	valImage;
+		ofxCvGrayscaleImage 	grayImage;
+		ofxCvGrayscaleImage 	threshedImage;
 
 		ofxPanel gui;
 		ofxLabel helpText;
 
-		ofRectangle roiRect;
+		ofxCvContourFinder 	contourFinder;
 
 		ofTrueTypeFont franklin;
-		
-		int pressedKey;
-		bool imageLoaded;
-		bool showResult;
+
+		bool selectingColor;
+
+		int targetHue, targetSat, targetVal;
 };
 

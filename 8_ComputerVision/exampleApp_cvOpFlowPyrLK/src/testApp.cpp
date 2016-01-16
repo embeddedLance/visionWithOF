@@ -11,7 +11,7 @@ void testApp::setup(){
 				vidGrabber.initGrabber(CAM_WIDTH,CAM_HEIGHT);
 				vidGrabber.setDeviceID(1);
 	#else
-				vidPlayer.loadMovie("fingers.mov");
+				vidPlayer.load("fingers.mov");
 				vidPlayer.play();
 	#endif
 
@@ -39,9 +39,9 @@ void testApp::update(){
     if (bNewFrame){
 
 #ifdef _USE_LIVE_VIDEO
-    colorImg.setFromPixels(vidGrabber.getPixels(), 320,240);
+    colorImg.setFromPixels(vidGrabber.getPixels().getData(), 320,240);
 #else
-    colorImg.setFromPixels(vidPlayer.getPixels(), 320,240);
+    colorImg.setFromPixels(vidPlayer.getPixels().getData(), 320,240);
 #endif
         grayImage = colorImg; // convert our color image to a grayscale image
         if (bLearnBakground == true) {
@@ -49,12 +49,12 @@ void testApp::update(){
             bLearnBakground = false;
         }
 
-   		cv::Mat mat_curr(CAM_HEIGHT, CAM_WIDTH, CV_8UC1, grayImage.getPixels(), cv::Mat::AUTO_STEP);
-  		cv::Mat mat_prev(CAM_HEIGHT, CAM_WIDTH, CV_8UC1, grayBg.getPixels(), cv::Mat::AUTO_STEP);
+   		cv::Mat mat_curr(CAM_HEIGHT, CAM_WIDTH, CV_8UC1, grayImage.getPixels().getData(), cv::Mat::AUTO_STEP);
+  		cv::Mat mat_prev(CAM_HEIGHT, CAM_WIDTH, CV_8UC1, grayBg.getPixels().getData(), cv::Mat::AUTO_STEP);
 
  		if(useFAST){
  			vector<cv::KeyPoint> keyPoints;
-			cv::FAST(grayBg.getCvImage(), keyPoints,30,true);
+			cv::FAST(mat_prev, keyPoints,30,true);
 			cv::KeyPoint::convert(keyPoints, prev_good_points);
 		}
 		else  {
@@ -98,13 +98,13 @@ void testApp::draw(){
 
 	colorImg.draw(0,0);
 
-	for( int i=0; i < status.size(); i++ ){
+	for( uint32_t i=0; i < status.size(); i++ ){
 		if(!status[i])
       		continue;
     	ofSetHexColor(0xff2f88);
-		ofLine(	ceil( prev_good_points[i].x ), ceil( prev_good_points[i].y ),
+		ofDrawLine(	ceil( prev_good_points[i].x ), ceil( prev_good_points[i].y ),
 				ceil( curr_good_points[i].x ), ceil( curr_good_points[i].y ) );
-				ofCircle(ceil( curr_good_points[i].x ), ceil( curr_good_points[i].y ),2);
+				ofDrawCircle(ceil( curr_good_points[i].x ), ceil( curr_good_points[i].y ),2);
 
 	}
 

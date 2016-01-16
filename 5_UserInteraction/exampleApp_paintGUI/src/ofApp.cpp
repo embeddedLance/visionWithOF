@@ -36,7 +36,7 @@ void ofApp::draw(){
 
 	canvas.begin();
 		if(scribbling)
-			ofCircle(mouseX, mouseY, radius);
+			ofDrawCircle(mouseX, mouseY, radius);
 	canvas.end();
 
 	ofSetHexColor(0xffffff);

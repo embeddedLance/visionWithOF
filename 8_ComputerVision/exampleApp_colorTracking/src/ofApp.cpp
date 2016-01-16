@@ -4,166 +4,93 @@
 void ofApp::setup(){
 	ofSetVerticalSync(TRUE);
 	ofSetBackgroundAuto(FALSE);
-	ofBackground(30,30,30);
+	ofBackground(0, 0, 0);
 
-	franklin.loadFont("frabk.ttf", 12);
+#ifdef _USE_LIVE_VIDEO
+	width 	= 640;
+	height 	= 480;
+
+    vidGrabber.setVerbose(true);
+    vidGrabber.setDeviceID(1);
+    vidGrabber.initGrabber(width, height);
+#else
+    vidPlayer.load("movingColors.mp4");
+    vidPlayer.setLoopState(OF_LOOP_NORMAL);
+    vidPlayer.play();
+
+    width	= vidPlayer.getWidth();
+    height 	= vidPlayer.getHeight();
+#endif
+
+	franklin.load("frabk.ttf", 12);
 	
-	gui.setup("Image Processing", "settings.xml", 5, 5);
-	gui.add(helpText.setup("Press",  "\n d:  display \n 1:  CV_TM_SQDIFF \n 2:  CV_TM_SQDIFF_NORMED \n 3:  CV_TM_CCORR \n 4:  CV_TM_CCORR_NORMED \n 5:  CV_TM_CCOEFF \n 6:  CV_TM_CCOEFF_NORMED", 200, 800));
+	gui.setup("Color Tracking", "settings.xml", 0, 0);
+	gui.add(helpText.setup("Use Mouse",  "\n to select color\n to track", 200, 360));
 
-	imageLoaded = false;
-	
-	image.loadImage("test.jpg");
-	width  = ofGetWidth() - 320;
-	height = (float)(width)/(float)(image.width) * image.height;
-	image.resize(width, height);
-	imageLoaded = true;
+	cvColorImage.allocate(width, height);
 
-	cout<< width << " " << height;
-
-	cvColorImage.setFromPixels(image.getPixelsRef());
-
-	showResult = false;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+	ofBackground(0, 0, 0);
+
 	
+    bool bNewFrame = false;
+
+	#ifdef _USE_LIVE_VIDEO
+       vidGrabber.update();
+	   bNewFrame = vidGrabber.isFrameNew();
+    #else
+        vidPlayer.update();
+        bNewFrame = vidPlayer.isFrameNew();
+	#endif
+
+	if (bNewFrame){
+
+		#ifdef _USE_LIVE_VIDEO
+            cvColorImage.setFromPixels(vidGrabber.getPixels());
+	    #else
+            cvColorImage.setFromPixels(vidPlayer.getPixels());
+        #endif
+
+        hsvImage = cvColorImage;
+        hsvImage.convertRgbToHsv();
+		threshedImage.setFromColorImage(hsvImage);
+
+		cvInRangeS(hsvImage.getCvImage(), cvScalar(targetHue-5, 70,70/*targetSat - 70, targetVal-30*/), cvScalar(targetHue + 5, 255, 255), threshedImage.getCvImage());
+		//threshedImage.draw(2*IMG_X_OFFSET, 0);
+
+
+		// find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
+		// also, find holes is set to true so we will get interior contours as well....
+		contourFinder.findContours(threshedImage, 10, (width * height)/3, 10, true);	// find holes
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){	
 
-	processKey(pressedKey);
+	cvColorImage.draw(IMG_X_OFFSET, IMG_Y_OFFSET);
+
+	//threshedImage.draw(IMG_X_OFFSET + width, IMG_Y_OFFSET);
+	ofSetHexColor(0x333333);
+	ofDrawRectangle(IMG_X_OFFSET+width,IMG_Y_OFFSET,width,height);
+	ofSetHexColor(0xffffff);
+	contourFinder.draw(IMG_X_OFFSET + width, IMG_Y_OFFSET);
+
+	ofSetHexColor(0xffffff);
+	//ofNoFill();
+	ofDrawCircle(mouseX, mouseY, 5);
+	ofSetHexColor(0xffffff);
 	gui.draw();
 }
 
-//--------------------------------------------------------------
-void ofApp::matchTemplate(int method){
-	ofBackground(30, 30, 30);
-
-	//basic image
-	cvColorImage.setFromPixels(image.getPixelsRef());
-
-	//template image
-	subjImage.allocate(roiRect.width, roiRect.height); //Allocate space for the template
-	cvColorImage.setROI(roiRect); //Set region of interest (ROI)
-	subjImage = cvColorImage; //Copy the specific area to the subject image
-	cvColorImage.resetROI(); //Reset the ROI or everything downstream will go crazy
-	
-	//result image
-	IplImage *result;
-	result = cvCreateImage(cvSize(cvColorImage.getWidth() - subjImage.getWidth() +1, cvColorImage.getHeight() - subjImage.getHeight() +1), 32, 1);
-	cvMatchTemplate(cvColorImage.getCvImage(), subjImage.getCvImage(), result, method);
-	resultImage.allocate(result->width, result->height);
-
-	//find location of the new roi
-	double minVal, maxVal;
-	CvPoint minLoc, maxLoc;
-	cvMinMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, 0);
-	ofSetHexColor(0xFFFFFF);
-	if(showResult){
-		resultImage = result;
-		resultImage.draw(IMG_X_OFFSET, 0);
-	}
-	else
-	image.draw(IMG_X_OFFSET, 0);
-	
-	ofSetHexColor(0x00FF00);  ofFill();  ofNoFill();
-	int px, py;
-
-	if((method == CV_TM_SQDIFF) || (method == CV_TM_SQDIFF_NORMED)){
-
-		if(showResult){
-			px = minLoc.x + roiRect.width;
-			py = minLoc.y;// + roiRect.height;
-		}
-		else{
-			px = minLoc.x;
-			py = minLoc.y;
-		}
-
-	}
-	else{
-		if(showResult){
-			px = maxLoc.x + roiRect.width;
-			py = maxLoc.y ;//+ roiRect.height;
-		}
-		else{
-			px = maxLoc.x;
-			py = maxLoc.y;
-		}
-	}
-
-	ofRect(px, py, roiRect.width, roiRect.height);		
-}
-
 
 //--------------------------------------------------------------
-void ofApp:: processKey(int key){
+void ofApp::keyPressed(int key){
 
 	switch(key){
-
-		case 'd':
-			ofBackground(30,30,30);
-			ofSetHexColor(0xFFFFFF);
-			image.draw(IMG_X_OFFSET, 0);
-			franklin.drawString("Basic Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case 'o':	{
-			image.grabScreen(IMG_X_OFFSET,0, width, height);
-			//ofFileDialogResult selectedPath = ofSystemLoadDialog("Please Select Folder to save Image", true, "/home/dimitri/" );
-			//string savePath = selectedPath.filePath + "/image.png";
-			image.saveImage("image.png");
-			}
-			franklin.drawString("Save Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case '1':
-			ofBackground(30,30,30);
-			matchTemplate(CV_TM_SQDIFF);
-			ofSetHexColor(0xFFFFFF);
-			franklin.drawString("CV_TM_SQDIFF", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case '2':
-			ofBackground(30,30,30);
-			matchTemplate(CV_TM_SQDIFF_NORMED);
-			ofSetHexColor(0xFFFFFF);
-			franklin.drawString("CV_TM_SQDIFF_NORMED", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case '3':
-			ofBackground(30,30,30);
-			matchTemplate(CV_TM_CCORR);
-			ofSetHexColor(0xFFFFFF);
-			franklin.drawString("CV_TM_CCORR", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case '4':
-			ofBackground(30,30,30);
-			matchTemplate(CV_TM_CCORR_NORMED);
-			ofSetHexColor(0xFFFFFF);
-			franklin.drawString("CV_TM_CCORR_NORMED", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case '5':
-			ofBackground(30,30,30);
-			matchTemplate(CV_TM_CCOEFF);
-			ofSetHexColor(0xFFFFFF);
-			franklin.drawString("CV_TM_CCOEFF", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case '6':
-			ofBackground(30,30,30);
-			matchTemplate(CV_TM_CCOEFF_NORMED);
-			ofSetHexColor(0xFFFFFF);
-			franklin.drawString("CV_TM_CCOEFF_NORMED", IMG_X_OFFSET, height +CAPTION_OFFSET);
-			break;
-
-		case 'r':
-			showResult = !showResult;
 
 		default:
 			cout << "key not supported"<< endl;
@@ -172,11 +99,6 @@ void ofApp:: processKey(int key){
 	}
 }
 
-//--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-
-	pressedKey = key;
-}
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
@@ -185,7 +107,7 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y){
-
+	
 }
 
 //--------------------------------------------------------------
@@ -195,26 +117,19 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-	if(button == 0){
-		ofSetHexColor(0xFFFFFF);
-		image.draw(IMG_X_OFFSET, 0);
-		startX = x;
-		startY = y;
-	}
+
+	image.setFromPixels(cvColorImage.getPixels());
+	ofColor color 	= image.getColor(x-IMG_X_OFFSET,y+IMG_Y_OFFSET);
+
+	//cout << "Hue " << color.getHue() << " Saturation " << color.getSaturation() << " Lightness " << color.getLightness() << endl;
+	targetHue 		= (int)(color.getHue() * 0.7);
+	targetSat 		= (int)(color.getSaturation());
+	targetVal 		= (int)(color.getLightness());
+	cout << "Hue " << targetHue << " Saturation " << targetSat << " Lightness " << targetVal << endl;
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-	if(button == 0){
-		endX = x;
-		endY = y;
-	}
-	ofSetHexColor(0xFF0000);
-	ofFill();
-	ofNoFill();
-	roiRect = ofRectangle(startX, startY, endX-startX, endY-startY);
-	ofRect(roiRect);
-	ofSetHexColor(0xFFFFFF);
 
 }
 

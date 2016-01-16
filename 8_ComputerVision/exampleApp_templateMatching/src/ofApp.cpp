@@ -6,22 +6,22 @@ void ofApp::setup(){
 	ofSetBackgroundAuto(FALSE);
 	ofBackground(30,30,30);
 
-	franklin.loadFont("frabk.ttf", 12);
+	franklin.load("frabk.ttf", 12);
 	
-	gui.setup("Image Processing", "settings.xml", 5, 5);
+	gui.setup("Template Matching", "settings.xml", 5, 5);
 	gui.add(helpText.setup("Press",  "\n d:  display \n 1:  CV_TM_SQDIFF \n 2:  CV_TM_SQDIFF_NORMED \n 3:  CV_TM_CCORR \n 4:  CV_TM_CCORR_NORMED \n 5:  CV_TM_CCOEFF \n 6:  CV_TM_CCOEFF_NORMED", 200, 800));
 
 	imageLoaded = false;
 	
-	image.loadImage("test.jpg");
+	image.load("test.jpg");
 	width  = ofGetWidth() - 320;
-	height = (float)(width)/(float)(image.width) * image.height;
+	height = (float)(width)/(float)(image.getWidth()) * image.getHeight();
 	image.resize(width, height);
 	imageLoaded = true;
 
 	cout<< width << " " << height;
 
-	cvColorImage.setFromPixels(image.getPixelsRef());
+	cvColorImage.setFromPixels(image.getPixels());
 
 	showResult = false;
 }
@@ -42,10 +42,10 @@ void ofApp::matchTemplate(int method){
 	ofBackground(30, 30, 30);
 
 	//basic image
-	cvColorImage.setFromPixels(image.getPixelsRef());
+	cvColorImage.setFromPixels(image.getPixels());
 
 	//template image
-	subjImage.allocate(roiRect.width, roiRect.height); //Allocate space for the template
+	subjImage.allocate(roiRect.getWidth(), roiRect.getHeight()); //Allocate space for the template
 	cvColorImage.setROI(roiRect); //Set region of interest (ROI)
 	subjImage = cvColorImage; //Copy the specific area to the subject image
 	cvColorImage.resetROI(); //Reset the ROI or everything downstream will go crazy
@@ -74,7 +74,7 @@ void ofApp::matchTemplate(int method){
 	if((method == CV_TM_SQDIFF) || (method == CV_TM_SQDIFF_NORMED)){
 
 		if(showResult){
-			px = minLoc.x + roiRect.width;
+			px = minLoc.x + roiRect.getWidth();
 			py = minLoc.y;// + roiRect.height;
 		}
 		else{
@@ -85,7 +85,7 @@ void ofApp::matchTemplate(int method){
 	}
 	else{
 		if(showResult){
-			px = maxLoc.x + roiRect.width;
+			px = maxLoc.x + roiRect.getWidth();
 			py = maxLoc.y ;//+ roiRect.height;
 		}
 		else{
@@ -94,7 +94,7 @@ void ofApp::matchTemplate(int method){
 		}
 	}
 
-	ofRect(px, py, roiRect.width, roiRect.height);		
+	ofDrawRectangle(px, py, roiRect.getWidth(), roiRect.getHeight());		
 }
 
 //--------------------------------------------------------------
@@ -113,7 +113,7 @@ void ofApp::keyPressed(int key){
 			image.grabScreen(IMG_X_OFFSET,0, width, height);
 			//ofFileDialogResult selectedPath = ofSystemLoadDialog("Please Select Folder to save Image", true, "/home/dimitri/" );
 			//string savePath = selectedPath.filePath + "/image.png";
-			image.saveImage("image.png");
+			image.save("image.png");
 			}
 			franklin.drawString("Save Image", IMG_X_OFFSET, height +CAPTION_OFFSET);
 			break;
@@ -206,7 +206,7 @@ void ofApp::mouseReleased(int x, int y, int button){
 	ofFill();
 	ofNoFill();
 	roiRect = ofRectangle(startX, startY, endX-startX, endY-startY);
-	ofRect(roiRect);
+	ofDrawRectangle(roiRect);
 	ofSetHexColor(0xFFFFFF);
 
 }

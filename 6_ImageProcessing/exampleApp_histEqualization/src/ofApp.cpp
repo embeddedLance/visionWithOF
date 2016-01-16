@@ -10,22 +10,22 @@ void ofApp::setup(){
 	ofSetBackgroundAuto(FALSE);
 	ofBackground(30,30,30);
 
-	franklin.loadFont("frabk.ttf", 12);
+	franklin.load("frabk.ttf", 12);
 
 	gui.setup("Hist Equalization", "settings.xml", 5, 5);
 	gui.add(helpText.setup("Press",  "\n d:  display \n w:  Grayscale Image \n e:  manual histogram \n     equalization \n c:  contrast stretching \n", 200, 400));
 
-	image.loadImage("lowerKachura.jpg");
+	image.load("lowerKachura.jpg");
 	//image.setImageType(OF_IMAGE_GRAYSCALE);
 
 	width  = ofGetWidth() - 320;
-	height = (float)(width)/(float)(image.width) * image.height;
+	height = (float)(width)/(float)(image.getWidth()) * image.getHeight();
 	image.resize(width, height);
 
-	cvColorImage.setFromPixels(image.getPixelsRef());
+	cvColorImage.setFromPixels(image.getPixels());
 	grayImage.setFromColorImage(cvColorImage);
 
-	pixels = grayImage.getPixels();
+	pixels = grayImage.getPixels().getData();
 
 	for(int i=0; i<255; i++){
 		histogram[i]   = 0;
@@ -79,13 +79,13 @@ void ofApp::draw(){
 
 		case 'w':
 			ofBackground(30,30,30);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			grayImage.setFromColorImage(cvColorImage);
 			grayImage.draw(IMG_X_OFFSET, 0);
 			
 			//draw histogram
 			for(int i=0;i<255;i++){
-					ofLine(i,height-histogram[i]/20,i,height);
+					ofDrawLine(i,height-histogram[i]/20,i,height);
 			}
 			
 			//draw caption
@@ -94,7 +94,7 @@ void ofApp::draw(){
 
 		case 'c':
 			ofBackground(30,30,30);
-			cvColorImage.setFromPixels(image.getPixelsRef());
+			cvColorImage.setFromPixels(image.getPixels());
 			grayImage.setFromColorImage(cvColorImage);
 			grayImage.contrastStretch();
 			grayImage.draw(IMG_X_OFFSET, 0);
@@ -109,7 +109,7 @@ void ofApp::draw(){
 
 			//draw histogram
 			for(int i=0;i<255;i++){
-				ofLine(i,height-eqHistogram[i]/20,i,height);
+				ofDrawLine(i,height-eqHistogram[i]/20,i,height);
 			}
 			
 			//draw caption
