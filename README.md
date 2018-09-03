@@ -1,5 +1,2 @@
-# visionWithOF
-Code repo for course on openFrameworks
-
-
-
+# visionWithO
+Code repo for course on openFrameworks.
